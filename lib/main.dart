@@ -1,7 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -15,12 +12,20 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: (context, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('App Two'),
+          ),
+          body: child,
+        );
+      },
       theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           textTheme: Theme.of(context).textTheme.copyWith(
-                bodyLarge: TextStyle(fontSize: 20.0, color: Colors.white),
+                bodyLarge: const TextStyle(fontSize: 20.0, color: Colors.white),
               )),
-      home: MainScreen(),
+      home: const MainScreen(),
     );
   }
 }
@@ -39,6 +44,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = <Widget>[
     const HomePage(),
     const DataPage(),
+    const ContactPage(), // Add this line
   ];
 
   @override
@@ -54,13 +60,17 @@ class _MainScreenState extends State<MainScreen> {
         },
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.home), // Wrapped Icons in Icon widget
-            label: 'Home', // Changed 'title' to 'label'
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.data_usage), // Wrapped Icons in Icon widget
-            label: 'Data', // Changed 'title' to 'label'
+            icon: Icon(Icons.data_usage),
+            label: 'Data',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.contact_mail),
+            label: 'Contact',
+          ), // Add this destination
         ],
       ),
     );
@@ -166,6 +176,159 @@ class _DataPageState extends State<DataPage> {
     } else {
       throw Exception('Failed to load posts');
     }
+  }
+}
+
+class ContactPage extends StatefulWidget {
+  const ContactPage({super.key});
+
+  @override
+  State<ContactPage> createState() => _ContactPageState();
+}
+
+class _ContactPageState extends State<ContactPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        color: Color(0xFFADD8E6),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Want something? Tell us.',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Name',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    TextFormField(
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.person),
+                        border: UnderlineInputBorder(),
+                        hintText: 'Enter your name',
+                      ),
+                      keyboardType: TextInputType.name,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your name';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        print("Name: $value");
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Email',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.email),
+                        border: UnderlineInputBorder(),
+                        hintText: 'Enter your email',
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
+                        if (!value.contains('@')) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        print("Email: $value");
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.list),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red),
+                        ),
+                        labelText:
+                            'Request Message', // Changed from static Text to labelText
+                        labelStyle: TextStyle(color: Colors.red),
+                        hintText: 'What do you want?',
+                        floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      ),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 3,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a request message';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        print("Request Message: $value");
+                      },
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Center(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                        print("Form is valid");
+                      }
+                    },
+                    icon: const Icon(Icons.send),
+                    label: const Text('Send'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.blue,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 15,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
